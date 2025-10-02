@@ -1,7 +1,11 @@
-export default function App() {
-  return (
-    <h1 className="text-5xl font-bold underline">
-      Certification Management System
-    </h1>
-  )
+import { useState } from "react";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+
+function App() {
+  const [user, setUser] = useState(null);
+  if (!user) return <Login setUser={setUser} />;
+  return <Dashboard user={user} />;
 }
+
+export default App;
