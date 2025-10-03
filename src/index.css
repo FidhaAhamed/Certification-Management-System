@@ -1,3 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Bebas+Neue&display=swap');
+
+/* Apply Bebas Neue as the default font for the entire body */
+body {
+  font-family: 'Audiowide', sans-serif !important;
+}
+
+/* Define a specific class for your sub-font (Audiowide) */
+.font-audiowide {
+  font-family: 'Audiowide', sans-serif !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

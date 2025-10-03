@@ -1,11 +1,13 @@
-import { useState } from "react";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import './App.css'
 
 function App() {
-  const [user, setUser] = useState(null);
-  if (!user) return <Login setUser={setUser} />;
-  return <Dashboard user={user} />;
-}
 
+  return (
+    <>
+      <h1 className="text-6xl font-bold underline">
+          CERTIFICATE MANAGEMENT SYSTEM
+      </h1>
+    </>
+  )
+}
 export default App;
