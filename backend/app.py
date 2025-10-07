@@ -67,27 +67,52 @@ def get_events():
     organizer_id = request.args.get("organizer_id")
     res = supabase.table("events").select("*").eq("organizer_id", organizer_id).execute()
     return jsonify(res.data)
+
+
+
 @app.route("/api/admin/create-user", methods=["POST"])
 def create_user():
     data = request.json
-    role = data.get("role")   # 'student' | 'teacher' | 'organizer'
+    role = data.get("role")
     name = data.get("name")
     password = data.get("password")
-    class_id = data.get("class_id")  # optional for students/teachers
+    class_id = data.get("class_id")
+    dept = data.get("dept")  # department (for teachers/students)
+    club_name = data.get("club_name")  # for organizers
+
+    if not role or not name or not password:
+        return jsonify({"success": False, "error": "Missing required fields"}), 400
 
     table = ROLE_TABLES.get(role.lower())
     if not table:
         return jsonify({"success": False, "error": "Invalid role"}), 400
 
     try:
-        res = supabase.table(table).insert({
+        insert_data = {
             "name": name,
-            "password": password,
-            **({"class_id": class_id} if class_id else {})
-        }).execute()
+            "password": password
+        }
+
+        # Role-specific fields
+        if role.lower() in ["student", "teacher"]:
+            if not class_id or not dept:
+                return jsonify({"success": False, "error": "class_id and dept are required for students/teachers"}), 400
+            insert_data["class_id"] = int(class_id)
+            insert_data["dept"] = dept
+
+        elif role.lower() == "organizer":
+            if not club_name:
+                return jsonify({"success": False, "error": "club_name is required for organizers"}), 400
+            insert_data["club_name"] = club_name
+
+        res = supabase.table(table).insert(insert_data).execute()
+
         return jsonify({"success": True, "data": res.data})
+
     except Exception as e:
+        print("Error creating user:", e)
         return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route("/api/upload-certificate", methods=["POST"])
 def upload_certificate():
     try:
