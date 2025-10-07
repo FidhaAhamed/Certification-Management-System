@@ -7,29 +7,32 @@ const StudentDashboard = ({ currentUser, handleLogout }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+console.log("currentUser in StudentDashboard:", currentUser);
+
   useEffect(() => {
-    if (!currentUser?.id) return;
+  const id = currentUser?.id || currentUser?.student_id; // Support both
+  if (!id) return;
 
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`http://127.0.0.1:5000/api/student/${currentUser.id}`);
-        const data = await res.json();
+  const fetchData = async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/api/student/${id}`);
+      const data = await res.json();
 
-        if (!data.success) {
-          setError(data.error || "Failed to fetch data");
-        } else {
-          setStudent(data.student);
-          setCertificates(data.certificates);
-        }
-      } catch (err) {
-        setError("Server error while fetching student data.");
-      } finally {
-        setLoading(false);
+      if (!data.success) {
+        setError(data.error || "Failed to fetch data");
+      } else {
+        setStudent(data.student);
+        setCertificates(data.certificates);
       }
-    };
+    } catch (err) {
+      setError("Server error while fetching student data.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
-  }, [currentUser]);
+  fetchData();
+}, [currentUser]);
 
   const handleDownload = (fileUrl) => {
     window.open(fileUrl, "_blank");
@@ -61,8 +64,7 @@ const StudentDashboard = ({ currentUser, handleLogout }) => {
         {/* Student Info */}
         <div className="bg-white shadow-lg rounded-xl mb-8 p-6">
           <h2 className="text-2xl font-semibold mb-2">Welcome, {student.name}</h2>
-          <p className="text-gray-600">ID: {student.id}</p>
-          <p className="text-gray-600">Class: {student.class_id}</p>
+          <p className="text-gray-600">ID: {student.student_id}</p>
           <p className="text-gray-600">Department: {student.dept}</p>
         </div>
 

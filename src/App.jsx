@@ -24,7 +24,11 @@ function App() {
         {/* Protected routes */}
         <Route
           path="/student"
-          element={currentUser ? <StudentDashboard handleLogout={handleLogout} /> : <Navigate to="/" />}
+          element={
+            currentUser
+              ? <StudentDashboard currentUser={currentUser} handleLogout={handleLogout} />
+              : <Navigate to="/" />
+          }
         />
         <Route
           path="/teacher"

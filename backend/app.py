@@ -52,7 +52,7 @@ def login():
 @app.route("/api/student/<student_id>", methods=["GET"])
 def get_student_dashboard(student_id):
     try:
-        student_res = supabase.table("students").select("*").eq("id", student_id).single().execute()
+        student_res = supabase.table("students").select("*").eq("student_id", student_id).single().execute()
         cert_res = supabase.table("certificates").select("*").eq("student_id", student_id).execute()
 
         return jsonify({
