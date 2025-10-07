@@ -164,5 +164,14 @@ def get_teacher_dashboard(teacher_id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-if __name__ == "__main__":
+
+
+
+
+
+@app.route('/')
+def home():
+    return "Welcome to the Certification Management System Backend!"
+
+if __name__ == '__main__':
     app.run(debug=True)
