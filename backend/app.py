@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
@@ -12,6 +12,9 @@ CORS(app)
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Role tables
 ROLE_TABLES = {
@@ -114,55 +117,62 @@ def create_user():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/api/upload-certificate", methods=["POST"])
-def upload_certificates():
+def upload_certificate():
     try:
-        files = request.files.getlist("files")  # notice 'files' for multiple files
+        files = request.files.getlist("files")  # Support multiple files
         event_id = request.form.get("event_id")
         organizer_id = request.form.get("organizer_id")
 
-        if not files or len(files) == 0:
+        if not files:
             return jsonify({"success": False, "message": "No files selected"}), 400
         if not event_id or not organizer_id:
             return jsonify({"success": False, "message": "Missing event_id or organizer_id"}), 400
 
-        event_id = int(event_id)
-        organizer_id = int(organizer_id)
-
-        UPLOAD_FOLDER = "uploads"
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-        inserted_files = []
+        uploaded_files = []
 
         for file in files:
+            if file.filename == "":
+                continue
+
             filename = file.filename
             parts = filename.split("_")
-            if len(parts) < 3 or not filename.lower().endswith(".pdf"):
-                return jsonify({"success": False, "message": f"Filename {filename} must be STUDENTID_CLASSID_certificate.pdf"}), 400
+            if len(parts) < 2 or not filename.lower().endswith(".pdf"):
+                return jsonify({"success": False, "message": f"Filename '{filename}' must be STUDENTID_CLASSID_certificate.pdf"}), 400
 
             student_id = int(parts[0])
+            class_id = int(parts[1])
 
-            # Save file
+            # Save file locally
             save_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(save_path)
 
-            # Insert certificate into Supabase
+            # Create a publicly accessible URL
+            file_url = f"http://127.0.0.1:5000/uploads/{filename}"
+
+            # Insert into Supabase
             res = supabase.table("certificates").insert({
                 "student_id": student_id,
                 "event_id": event_id,
                 "upload_by": organizer_id,
-                "file_url": f"/{save_path}"  # path to serve
+                "file_url": f"http://127.0.0.1:5000/uploads/{filename}"
             }).execute()
 
             if res.data:
-                inserted_files.append({"file_url": f"/{save_path}", "student_id": student_id})
+                uploaded_files.append(filename)
             else:
-                print(f"Failed to insert certificate for {filename}")
+                return jsonify({"success": False, "message": f"Database insert failed for {filename}"}), 500
 
-        return jsonify({"success": True, "files": inserted_files})
+        return jsonify({"success": True, "files": uploaded_files})
 
     except Exception as e:
         print("Upload error:", e)
         return jsonify({"success": False, "message": str(e)}), 500
+
+
+# ✅ NEW: Serve uploaded files
+@app.route("/uploads/<filename>")
+def serve_file(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 @app.route("/api/teacher/<teacher_id>", methods=["GET"])
 def get_teacher_dashboard(teacher_id):

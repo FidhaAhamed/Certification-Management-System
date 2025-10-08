@@ -23,7 +23,7 @@ const OrganizerDashboard = ({ currentUser, handleLogout }) => {
   }, [currentUser.organizer_id]);
 
   // Handle PDF upload
-  const handleFileUpload = async (e) => {
+const handleFileUpload = async (e) => {
   const files = e.target.files;
   if (!files.length || !selectedEventId) {
     setUploadMessage("Select files and an event first.");
@@ -71,6 +71,8 @@ const OrganizerDashboard = ({ currentUser, handleLogout }) => {
         `✅ Successfully uploaded ${result.files.length} file(s).`
       );
       setSelectedEventId(null);
+      // Clear file input
+      e.target.value = null;
     } else {
       setUploadMessage(`❌ Error uploading certificates: ${result.message}`);
     }
@@ -78,8 +80,6 @@ const OrganizerDashboard = ({ currentUser, handleLogout }) => {
     console.error(err);
     setUploadMessage("❌ Server error during upload.");
   }
-
-  
 };
 
   return (
