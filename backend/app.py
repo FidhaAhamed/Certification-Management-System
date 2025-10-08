@@ -167,16 +167,16 @@ def upload_certificates():
 @app.route("/api/teacher/<teacher_id>", methods=["GET"])
 def get_teacher_dashboard(teacher_id):
     try:
-        # Step 1: Get teacher's class
-        teacher_res = supabase.table("teachers").select("class_id, name").eq("id", teacher_id).single().execute()
+        # Step 1: Get teacher's class using teacher_id (not id)
+        teacher_res = supabase.table("teachers").select("class_id, name").eq("teacher_id", teacher_id).single().execute()
         if not teacher_res.data:
             return jsonify({"success": False, "error": "Teacher not found"}), 404
 
         class_id = teacher_res.data["class_id"]
 
-        # Step 2: Get students of that class
-        students_res = supabase.table("students").select("id, name").eq("class_id", class_id).execute()
-        student_ids = [s["id"] for s in students_res.data]
+        # Step 2: Get students of that class using student_id (not id)
+        students_res = supabase.table("students").select("student_id, name").eq("class_id", class_id).execute()
+        student_ids = [s["student_id"] for s in students_res.data]  # Use student_id
 
         # Step 3: Get certificates for these students
         certs_res = supabase.table("certificates").select("*").in_("student_id", student_ids).execute()
