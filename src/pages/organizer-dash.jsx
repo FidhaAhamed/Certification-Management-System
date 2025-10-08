@@ -24,57 +24,63 @@ const OrganizerDashboard = ({ currentUser, handleLogout }) => {
 
   // Handle PDF upload
   const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file || !selectedEventId) {
-      setUploadMessage("Select a file and an event first.");
-      return;
-    }
+  const files = e.target.files;
+  if (!files.length || !selectedEventId) {
+    setUploadMessage("Select files and an event first.");
+    return;
+  }
 
-    // Expect filename format: studentId_classId_anything.pdf
+  const formData = new FormData();
+  let allValid = true;
+
+  // Loop through files and validate filename
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
     const filename = file.name.split(".")[0];
     const parts = filename.split("_");
     if (parts.length < 2) {
       setUploadMessage(
-        "Filename must be in format: studentId_classId_anything.pdf"
+        `Filename "${file.name}" must be in format: studentId_classId_anything.pdf`
       );
-      return;
+      allValid = false;
+      break;
     }
-    const studentId = parts[0];
-    const classId = parts[1];
+    formData.append("files", file); // append each file
+  }
 
-    setUploadMessage(`Uploading ${file.name}...`);
+  if (!allValid) return;
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("event_id", selectedEventId);
-      formData.append("organizer_id", currentUser.organizer_id);
-      formData.append("student_id", studentId);
-      formData.append("class_id", classId);
+  formData.append("event_id", selectedEventId);
+  formData.append("organizer_id", currentUser.organizer_id);
 
-      const res = await fetch(
-        "http://localhost:5000/api/upload-certificate",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+  setUploadMessage(`Uploading ${files.length} file(s)...`);
 
-      const result = await res.json();
-
-      if (res.ok && result.success) {
-        setUploadMessage(
-          `✅ Successfully uploaded certificate. File URL: ${result.file_url || "N/A"}`
-        );
-        setSelectedEventId(null);
-      } else {
-        setUploadMessage(`❌ Error uploading certificate: ${result.error}`);
+  try {
+    const res = await fetch(
+      "http://localhost:5000/api/upload-certificate",
+      {
+        method: "POST",
+        body: formData,
       }
-    } catch (err) {
-      console.error(err);
-      setUploadMessage("❌ Server error during upload.");
+    );
+
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+      setUploadMessage(
+        `✅ Successfully uploaded ${result.files.length} file(s).`
+      );
+      setSelectedEventId(null);
+    } else {
+      setUploadMessage(`❌ Error uploading certificates: ${result.message}`);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setUploadMessage("❌ Server error during upload.");
+  }
+
+  
+};
 
   return (
     <div className="min-h-screen bg-gray-50 font-inter">
@@ -145,23 +151,26 @@ const OrganizerDashboard = ({ currentUser, handleLogout }) => {
         </div>
 
         {/* File Upload Section */}
-        {selectedEventId && (
-          <div className="mt-6 bg-white shadow-lg rounded-xl p-6">
-            <h3 className="text-xl font-bold mb-2">
-              Upload Certificate for Event ID: {selectedEventId}
-            </h3>
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={handleFileUpload}
-              className="mb-4"
-            />
-            {uploadMessage && <p>{uploadMessage}</p>}
-          </div>
-        )}
+        {/* File Upload Section */}
+{selectedEventId && (
+  <div className="mt-6 bg-white shadow-lg rounded-xl p-6">
+    <h3 className="text-xl font-bold mb-2">
+      Upload Certificates for Event ID: {selectedEventId}
+    </h3>
+    <input
+      type="file"
+      accept=".pdf"
+      multiple // <-- allow multiple selection
+      onChange={handleFileUpload}
+      className="mb-4"
+    />
+    {uploadMessage && <p>{uploadMessage}</p>}
+  </div>
+)}
+
       </main>
     </div>
   );
 };
 
-export default OrganizerDashboard;
+export default OrganizerDashboard; 

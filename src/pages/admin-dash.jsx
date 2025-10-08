@@ -6,6 +6,8 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [classId, setClassId] = useState("");
+  const [dept, setDept] = useState("");
+  const [clubName, setClubName] = useState("");
   const [message, setMessage] = useState("");
 
   const handleCreateUser = async (e) => {
@@ -13,15 +15,32 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
     setMessage("");
 
     if (!name || !password) {
-      setMessage("Name and password are required");
+      setMessage("❌ Name and password are required");
       return;
+    }
+
+    const payload = { role, name, password };
+
+    if (role === "student" || role === "teacher") {
+      if (!classId || !dept) {
+        setMessage("❌ Class ID and Department are required for this role");
+        return;
+      }
+      payload.class_id = classId;
+      payload.dept = dept;
+    } else if (role === "organizer") {
+      if (!clubName) {
+        setMessage("❌ Club name is required for organizers");
+        return;
+      }
+      payload.club_name = clubName;
     }
 
     try {
       const res = await fetch("http://localhost:5000/api/admin/create-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, name, password, class_id: classId }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -31,6 +50,8 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
         setName("");
         setPassword("");
         setClassId("");
+        setDept("");
+        setClubName("");
       } else {
         setMessage(`❌ ${data.error || "Failed to create user"}`);
       }
@@ -64,7 +85,9 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
           {message && (
             <p
               className={`p-3 mb-4 rounded-lg ${
-                message.startsWith("✅") ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                message.startsWith("✅")
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
               }`}
             >
               {message}
@@ -72,6 +95,7 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
           )}
 
           <form onSubmit={handleCreateUser} className="space-y-4">
+            {/* Role */}
             <div>
               <label className="block mb-1 font-medium text-gray-700">Role</label>
               <select
@@ -85,6 +109,7 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
               </select>
             </div>
 
+            {/* Name */}
             <div>
               <label className="block mb-1 font-medium text-gray-700">Name</label>
               <input
@@ -96,6 +121,7 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
               />
             </div>
 
+            {/* Password */}
             <div>
               <label className="block mb-1 font-medium text-gray-700">Password</label>
               <input
@@ -107,16 +133,48 @@ const AdminDashboard = ({ currentUser, handleLogout }) => {
               />
             </div>
 
-            {/* Optional class_id for students/teachers */}
+            {/* Conditional fields */}
             {(role === "student" || role === "teacher") && (
+              <>
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    Class ID
+                  </label>
+                  <input
+                    type="text"
+                    value={classId}
+                    onChange={(e) => setClassId(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Enter class ID"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1 font-medium text-gray-700">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    value={dept}
+                    onChange={(e) => setDept(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Enter department"
+                  />
+                </div>
+              </>
+            )}
+
+            {role === "organizer" && (
               <div>
-                <label className="block mb-1 font-medium text-gray-700">Class ID</label>
+                <label className="block mb-1 font-medium text-gray-700">
+                  Club Name
+                </label>
                 <input
                   type="text"
-                  value={classId}
-                  onChange={(e) => setClassId(e.target.value)}
+                  value={clubName}
+                  onChange={(e) => setClubName(e.target.value)}
                   className="w-full px-4 py-2 border rounded-lg"
-                  placeholder="Enter class ID"
+                  placeholder="Enter club name"
                 />
               </div>
             )}
