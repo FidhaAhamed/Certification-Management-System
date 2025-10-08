@@ -31,9 +31,13 @@ function App() {
           }
         />
         <Route
-          path="/teacher"
-          element={currentUser ? <TeacherDashboard handleLogout={handleLogout} /> : <Navigate to="/" />}
-        />
+        path="/teacher"
+        element={
+          currentUser
+            ? <TeacherDashboard currentUser={currentUser} handleLogout={handleLogout} />
+            : <Navigate to="/" />
+        }
+      />
         <Route
           path="/organizer"
           element={
