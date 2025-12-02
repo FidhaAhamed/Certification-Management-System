@@ -93,6 +93,3 @@ Contributing
 
 License
 This project is licensed under the MIT License.
-Maintainer / Contact
-Maintainer: FidhaAhamed  
-Repository: https://github.com/FidhaAhamed/Certification-Management-System
