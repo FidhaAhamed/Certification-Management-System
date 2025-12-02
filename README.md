@@ -23,22 +23,6 @@ Utilities & Libraries:
 - Flask extensions (Flask-CORS, Flask-RESTful or Flask-Smorest, etc.)
 - Supabase Python / JavaScript clients
 
-Project Structure
-/backend                # Flask backend, API and Supabase integration
-  ├─ app.py             # Main Flask application (or package entrypoint)
-  ├─ api/               # API endpoints and route handlers
-  ├─ services/          # Business logic (uploads, verification, role checks)
-  ├─ models/            # Data access layer or Supabase helpers
-  ├─ scripts/           # Helper scripts (migrations, seed, maintenance)
-  └─ requirements.txt
-
-              # React.js + Vite frontend (dashboard and user UI)
-/src/
-/public/
-package.json
-vite.config.js
-tailwind.config.js
-
 Getting Started
 
 1. Clone the repository
