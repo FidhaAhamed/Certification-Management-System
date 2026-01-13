@@ -3,6 +3,7 @@
 A Centralized Digital Platform for Certificate Distribution and Access
 
 Abstract
+
 The Certification Management System is a digital platform that centralizes the storage, distribution, and verification of event certificates. Event organizers upload certificates under each event name so students can log in to view and download their certificates anytime. Faculty advisors have role-based access to track certificates for their students. The system reduces manual validation, repeated communications, and the difficulty students face in organizing certificates spread across disparate links and platforms. It creates a secure, verified, and accessible digital archive of student achievements.
 
 Tech Stack
